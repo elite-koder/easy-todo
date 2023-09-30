@@ -1,0 +1,2 @@
+class CantDeleteDefaultList(Exception):
+    pass
