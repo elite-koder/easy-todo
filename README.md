@@ -7,3 +7,5 @@ features covered
 3. you can delete a list
 4. you can mark Done a todo task anytime
 5. if you have created a task by mistake or you don't remember about it you can always delete it
+
+Demo Link - http://demo.easytodo.xyz
