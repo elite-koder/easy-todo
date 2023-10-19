@@ -137,14 +137,19 @@ $(".hide-alert-on-click").on("click", function() {
   $(this).parent().parent().hide();
 });
 
-target_datepicker = $('#target_datepicker').datepicker({
-  language: "es",
-  autoclose: true,
-  format: "dd/mm/yyyy",
-  todayHighlight: true,
+$(document).ready(function () {
+  target_datepicker = $('#target_datepicker').datepicker({
+    language: "es",
+    autoclose: true,
+    format: "dd/mm/yyyy",
+    todayHighlight: true,
+    startDate: new Date(),
+  });
+  target_datepicker.on('hide', function(e) {
+    e.stopPropagation();
+  });
+  target_datepicker.datepicker('setDate', 'today');
 });
-target_datepicker.datepicker('setDate', 'today');
-
 $("#delete_todolist_btn").on("click", function() {
   if(!confirm("Delete List, Are you sure?")) {
     return;
