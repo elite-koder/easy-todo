@@ -142,5 +142,6 @@ MESSAGE_TAGS = {
 }
 
 GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
-
+LOGIN_URI = "https://easytodo.xyz"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+

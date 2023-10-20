@@ -185,10 +185,10 @@
     {% csrf_token %}
     <img class="mb-4 mx-auto d-block" src="{% static '/images/green-check-circle-logo.png' %}" alt="" width="72">
     <div id="g_id_onload"
-         data-client_id="169244053082-82mbirdmflrr2e8odrqam9u0uaqss2gg.apps.googleusercontent.com"
+         data-client_id="{{GOOGLE_CLIENT_ID}}"
          data-context="signin"
          data-ux_mode="redirect"
-         data-login_uri="http://localhost:8000/login"
+         data-login_uri="{{LOGIN_URI}}"
          data-nonce=""
          data-auto_prompt="false">
     </div>

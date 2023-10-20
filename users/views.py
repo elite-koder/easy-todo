@@ -31,7 +31,7 @@ def login_view(request):
     elif request.method == "GET":
         if not request.session.session_key:
             request.session.create()
-        return render(request, "login.html", {})
+        return render(request, "login.html", {"GOOGLE_CLIENT_ID": settings.GOOGLE_CLIENT_ID, "LOGIN_URI": settings.LOGIN_URI})
     raise NotImplementedError
 
 
