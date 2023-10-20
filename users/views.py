@@ -15,7 +15,6 @@ from google.auth.transport import requests
 @csrf_exempt
 def login_view(request):
     if request.method == "POST":
-        print(request.POST)
         try:
             id_info = id_token.verify_oauth2_token(request.POST["credential"], requests.Request(), settings.GOOGLE_CLIENT_ID)
             if not request.session.session_key:
