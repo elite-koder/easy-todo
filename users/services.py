@@ -9,9 +9,8 @@ class UserService:
     def logout_user(self):
         pass
 
-    def create_user(self, username):
-        user, created = User.objects.get_or_create(username=username)
-        print(user, user.id, created)
+    def create_user(self, email, name, dp_link):
+        user, created = User.create_user(email, name, dp_link)
         if created:
             TodoListService().create_default_list(user)
         return user, created

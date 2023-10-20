@@ -53,7 +53,12 @@ def easy_todo_view(request):
         resp_context = {
             "todo_lists": TodoListService().get_todo_lists(request.user),
             "todo_items": todo_items,
-            "selected_todo_list_id": selected_todo_list_id
+            "selected_todo_list_id": selected_todo_list_id,
+            "user_info": {
+                "name": request.user.name,
+                "dp_link": request.user.dp_link,
+                "email": request.user.email,
+            }
         }
         return render(request, "easy_todo.html", resp_context)
     raise NotImplementedError

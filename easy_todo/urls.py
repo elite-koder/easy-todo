@@ -14,7 +14,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path
 
 from todo_item.views import create_todo_item_view, manage_todo_item_view, get_todays_todolist
@@ -31,5 +32,4 @@ urlpatterns = [
     path("todo_lists/create", create_todo_list_view, name="create_todo_list_view"),
     path("todo_items/create", create_todo_item_view, name="create_todo_item_view"),
     path("", redirect_to_main_page, name="redirect_to_main_page"),
-    path('admin/', admin.site.urls),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
