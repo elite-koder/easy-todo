@@ -25,15 +25,14 @@ class TodoItem(BaseModel):
         return cls.objects.get_or_create(desc=todo_desc, owner=owner, target_date=timezone.make_aware(target_date, timezone.get_default_timezone()), todo_list_id=todolist_id)
 
     @classmethod
-    def get_todo_items_from_list(cls, owner, todo_list_id):
-        todo_items = cls.objects.filter(owner=owner, todo_list_id=todo_list_id).order_by("target_date").values("id", "desc", "status", "target_date")
+    def get_todo_items_from_list(cls, owner, todo_list_id, todo_item_status):
+        todo_items = cls.objects.filter(owner=owner, todo_list_id=todo_list_id)
+        if todo_item_status == TodoItemStatus.OPEN:
+            todo_items = todo_items.filter(status=todo_item_status)
+        todo_items = todo_items.order_by("target_date").values("id", "desc", "status", "target_date")
         for item in todo_items:
             item["target_date"] = item["target_date"].strftime("%d/%m/%Y")
         return todo_items
-
-    @classmethod
-    def get_todo_items_for_date(cls, owner, target_date):
-        return cls.objects.filter(owner=owner, target_date=target_date, status=TodoItemStatus.OPEN).values("id", "desc", list_title=F("todo_list__title"))
 
     @classmethod
     def mark_todo_item_done(cls, owner, todo_item_id):

@@ -27,8 +27,7 @@ SECRET_KEY = 'django-insecure-=nqu$#d^tzptctc8pq8b=ry$0s9jev^+*5hvcd7=c77d1cxdp0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "easytodo.xyz"]
-CSRF_TRUSTED_ORIGINS = ['https://easytodo.xyz']
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -142,6 +141,6 @@ MESSAGE_TAGS = {
 }
 
 GOOGLE_CLIENT_ID = os.environ["GOOGLE_CLIENT_ID"]
-LOGIN_URI = "https://easytodo.xyz/login"
+LOGIN_URI = "http://localhost:8000/login"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 

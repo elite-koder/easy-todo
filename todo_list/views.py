@@ -44,16 +44,18 @@ def manage_todo_list_view(request):
 @login_required
 def easy_todo_view(request):
     if request.method == "GET":
-        selected_todo_list_id = request.GET.get("selected_todo_list_id", "")
-        if selected_todo_list_id.isnumeric():
-            selected_todo_list_id = int(selected_todo_list_id)
+        todolist_id_filter = request.GET.get("todolist_id_filter", "")
+        todo_item_status_filter = request.GET.get("todo_item_status_filter", "OPEN")
+        if todolist_id_filter.isnumeric():
+            todolist_id_filter = int(todolist_id_filter)
         else:
-            selected_todo_list_id = TodoListService().get_default_list_id(request.user)
-        todo_items = TodoItemService().get_todo_items(request.user, selected_todo_list_id)
+            todolist_id_filter = TodoListService().get_default_list_id(request.user)
+        todo_items = TodoItemService().get_todo_items(request.user, todolist_id_filter, todo_item_status_filter)
         resp_context = {
             "todo_lists": TodoListService().get_todo_lists(request.user),
             "todo_items": todo_items,
-            "selected_todo_list_id": selected_todo_list_id,
+            "todolist_id_filter": todolist_id_filter,
+            "todo_item_status_filter": todo_item_status_filter,
             "user_info": {
                 "name": request.user.name,
                 "dp_link": request.user.dp_link,

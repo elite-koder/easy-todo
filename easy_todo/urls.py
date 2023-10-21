@@ -18,7 +18,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 
-from todo_item.views import create_todo_item_view, manage_todo_item_view, get_todays_todolist
+from todo_item.views import create_todo_item_view, manage_todo_item_view
 from todo_list.views import create_todo_list_view, manage_todo_list_view, easy_todo_view
 from users.views import login_view, redirect_to_main_page, logout_view
 
@@ -26,7 +26,6 @@ urlpatterns = [
     path("login", login_view, name="login-view"),
     path("logout", logout_view, name="logout-view"),
     path("easy_todo", easy_todo_view, name="easy_todo_view"),
-    path("todo_items/todays_list", get_todays_todolist, name="get_todays_todolist"),
     path("todo_items/manage", manage_todo_item_view, name="manage_todo_item_view"),
     path("todo_lists/manage", manage_todo_list_view, name="manage_todo_list_view"),
     path("todo_lists/create", create_todo_list_view, name="create_todo_list_view"),

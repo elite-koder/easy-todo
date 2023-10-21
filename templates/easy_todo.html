@@ -1,21 +1,31 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Easy Todo{% endblock %}
 {% block content %}
     <div>
       {% csrf_token %}
       <!-- Date Picker -->
       <div class="row">
-        <div class="col-5">
+        <div class="col-4">
           <select class="form-select" aria-label="Default select example" id="todo_list_dd" name="todo_list_id">
             {% for todo_list in todo_lists %}
-            <option value="{{todo_list.id}}" {% if todo_list.id == selected_todo_list_id %}selected{% endif %}>{{todo_list.title}}</option>
+            <option value="{{todo_list.id}}" {% if todo_list.id == todolist_id_filter %}selected{% endif %}>{{todo_list.title}}</option>
             {% endfor %}
           </select>
         </div>
         <div class="col-4">
           <button type="submit" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#TodoItemCreateModal">Add New Task</button>
           <button type="submit" class="btn btn-md btn-secondary" data-bs-toggle="modal" data-bs-target="#TodoListCreateModal">Add New List</button>
-          <button type="submit" class="btn btn-md btn-danger" id="delete_todolist_btn">Delete List</button></div>
+          <button type="submit" class="btn btn-md btn-danger" id="delete_todolist_btn">Delete List</button>
+        </div>
+        <div class="col-3">
+          <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" name="todo_item_status_filter" data-value="OPEN" id="todo_item_status_filter_open" autocomplete="off" {% if todo_item_status_filter == "OPEN" %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="todo_item_status_filter_open">Open</label>
+            <input type="radio" class="btn-check" name="todo_item_status_filter" data-value="ALL" id="todo_item_status_filter_all" autocomplete="off" {% if todo_item_status_filter == "ALL" %}checked{% endif %}>
+            <label class="btn btn-outline-primary ps-4 pe-4" for="todo_item_status_filter_all">All</label>
+          </div>
+        </div>
       </div>
       <div class="modal fade" id="TodoListCreateModal" tabindex="-1" role="dialog" aria-labelledby="TodoListCreateModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -127,122 +137,6 @@
       {% endif %}
     </div>
 {% endblock %}
-{% block page_js %}
-$("#todo_list_dd").on("change", function() {
-  console.log("on change");
-  window.location.href = window.location.pathname + "?selected_todo_list_id="+$("#todo_list_dd").val()
-});
-
-$(".hide-alert-on-click").on("click", function() {
-  $(this).parent().parent().hide();
-});
-
-$(document).ready(function () {
-  target_datepicker = $('#target_datepicker').datepicker({
-    language: "es",
-    autoclose: true,
-    format: "dd/mm/yyyy",
-    todayHighlight: true,
-    startDate: new Date(),
-  });
-  target_datepicker.on('hide', function(e) {
-    e.stopPropagation();
-  });
-  target_datepicker.datepicker('setDate', 'today');
-});
-$("#delete_todolist_btn").on("click", function() {
-  if(!confirm("Delete List, Are you sure?")) {
-    return;
-  }
-  $.ajax({
-    type: "POST",
-    url: "/todo_lists/manage",
-    data: {"todo_list_id": $("#todo_list_dd").val()},
-    beforeSend: function (xhr){
-      xhr.setRequestHeader('X-CSRFToken', $("[name=csrfmiddlewaretoken]").val());
-    },
-    error: function(error) {},
-    success: function(resp) {
-      location.href = "/easy_todo";
-    }
-  });
-});
-
-$('#TodoListCreateModal').on('show.bs.modal', function (event) {
-  var modal = $(this)
-  modal.find('#todo_list_title').val('');
-});
-
-$('#TodoItemCreateModal').on('show.bs.modal', function (event) {
-  var modal = $(this)
-  $("#create_task_success_msg").hide();
-  $("#create_task_error_msg").hide();
-});
-
-$('#TodoItemCreateModal').on('hide.bs.modal', function (event) {
-  location.reload()
-});
-
-
-$("#create_todolist_btn").click(function() {
-  $.ajax({
-    type: "POST",
-    url: "/todo_lists/create",
-    data: {"todo_list_name": $("#todo_list_name_input").val()},
-    beforeSend: function (xhr){
-      xhr.setRequestHeader('X-CSRFToken', $("[name=csrfmiddlewaretoken]").val());
-    },
-    error: function(error) {console.log(error);},
-    success: function(resp) {
-      if (!resp["error"]) {
-        alert("List already exists")
-      }
-      window.location.href = window.location.pathname + "?selected_todo_list_id="+resp["id"]
-    }
-  });
-});
-
-$("#create_todoitem_btn").click(function() {
-  if ($("#todo_item_desc_input").val() === "") {
-    $("#create_task_success_msg").hide();
-    $("#create_task_error_msg").find("strong").text("Hiss!!! please enter task description first");
-    $("#create_task_error_msg").show();
-    return;
-  }
-  $.ajax({
-    type: "POST",
-    url: "/todo_items/create",
-    data: {"todo_desc": $("#todo_item_desc_input").val(), "todo_list_id": $("#todo_list_dd").val(), "todo_target_date": $("#todo_target_date").val()},
-    beforeSend: function (xhr){
-      xhr.setRequestHeader('X-CSRFToken', $("[name=csrfmiddlewaretoken]").val());
-    },
-    error: function(resp) {
-      resp = JSON.parse(resp.responseText);
-      $("#create_task_success_msg").hide();
-      $("#create_task_error_msg").find("strong").text(resp["msg"]);
-      $("#create_task_error_msg").show();
-    },
-    success: function(resp) {
-      $("#create_task_error_msg").hide();
-      $("#create_task_success_msg").find("strong").text(resp["msg"]);
-      $("#create_task_success_msg").show();
-    }
-  });
-});
-
-function manage_todo_item(op, todo_item_id) {
-  $.ajax({
-    type: "POST",
-    url: "/todo_items/manage",
-    data: {todo_item_id: todo_item_id, op: op},
-    beforeSend: function (xhr){
-      xhr.setRequestHeader('X-CSRFToken', $("[name=csrfmiddlewaretoken]").val());
-    },
-    error: function(error) {console.log(error);},
-    success: function() {
-      location.reload();
-    }
-  });
-}
-
+{% block page_js_file %}
+<script src="{% static 'js/easy_todo.js' %}"></script>
 {% endblock %}

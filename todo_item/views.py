@@ -7,16 +7,6 @@ from django.shortcuts import render, redirect
 from django.utils import timezone
 
 from todo_item.services import TodoItemService
-from todo_list.services import TodoListService
-
-
-@login_required
-def get_todays_todolist(request):
-    page = "todays_todo"
-    if request.method == "GET":
-        todo_items = TodoItemService().get_todays_todo_items(request.user)
-        resp_context = {"todo_items": todo_items, "page": page}
-        return render(request, "todays_todolist.html", resp_context)
 
 
 @login_required
