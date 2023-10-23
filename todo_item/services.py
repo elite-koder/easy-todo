@@ -15,3 +15,6 @@ class TodoItemService:
 
     def delete_todo_item(self, owner, todo_item_id):
         TodoItem.delete_todo_item(owner, todo_item_id)
+
+    def update_todo_item(self, owner, todo_item_id, desc, todo_list_id, target_date):
+        TodoItem.update_todo_item(owner, todo_item_id, desc, todo_list_id, target_date)

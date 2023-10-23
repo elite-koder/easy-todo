@@ -2,140 +2,221 @@
 {% load static %}
 {% block title %}Easy Todo{% endblock %}
 {% block content %}
-    <div>
-      {% csrf_token %}
-      <!-- Date Picker -->
-      <div class="row">
-        <div class="col-4">
-          <select class="form-select" aria-label="Default select example" id="todo_list_dd" name="todo_list_id">
-            {% for todo_list in todo_lists %}
-            <option value="{{todo_list.id}}" {% if todo_list.id == todolist_id_filter %}selected{% endif %}>{{todo_list.title}}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="col-4">
-          <button type="submit" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#TodoItemCreateModal">Add New Task</button>
-          <button type="submit" class="btn btn-md btn-secondary" data-bs-toggle="modal" data-bs-target="#TodoListCreateModal">Add New List</button>
-          <button type="submit" class="btn btn-md btn-danger" id="delete_todolist_btn">Delete List</button>
-        </div>
-        <div class="col-3">
-          <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-            <input type="radio" class="btn-check" name="todo_item_status_filter" data-value="OPEN" id="todo_item_status_filter_open" autocomplete="off" {% if todo_item_status_filter == "OPEN" %}checked{% endif %}>
-            <label class="btn btn-outline-primary" for="todo_item_status_filter_open">Open</label>
-            <input type="radio" class="btn-check" name="todo_item_status_filter" data-value="ALL" id="todo_item_status_filter_all" autocomplete="off" {% if todo_item_status_filter == "ALL" %}checked{% endif %}>
-            <label class="btn btn-outline-primary ps-4 pe-4" for="todo_item_status_filter_all">All</label>
-          </div>
+  <div>
+    {% csrf_token %}
+    <!-- Date Picker -->
+    <div class="row">
+      <div class="col-3">
+        <select class="form-select" aria-label="Default select example" id="todo_list_dd" name="todo_list_id">
+          <option value="all">All</option>
+          {% for todo_list in todo_lists %}
+          <option value="{{todo_list.id}}" {% if todo_list.id == todolist_id_filter %}selected{% endif %}>{{todo_list.title}}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-6">
+        <button type="submit" class="btn btn-md btn-primary" data-bs-toggle="modal" data-bs-target="#TodoItemCreateModal" {% if todolist_id_filter == None %}disabled{% endif %}>Add New Task</button>
+        <button type="submit" class="btn btn-md btn-info" data-bs-toggle="modal" data-bs-target="#TodoListCreateModal">Add New List</button>
+        <button type="submit" class="btn btn-md btn-secondary" id="todolist_rename_modal_open_btn" {% if todolist_id_filter == None %}disabled{% endif %}>Rename List</button>
+        <button type="submit" class="btn btn-md btn-danger" id="delete_todolist_btn" {% if todolist_id_filter == None %}disabled{% endif %}>Delete List</button>
+      </div>
+      <div class="col-2">
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" name="todo_item_status_filter" data-value="OPEN" id="todo_item_status_filter_open" autocomplete="off" {% if todo_item_status_filter == "OPEN" %}checked{% endif %}>
+          <label class="btn btn-outline-primary" for="todo_item_status_filter_open">Open</label>
+          <input type="radio" class="btn-check" name="todo_item_status_filter" data-value="ALL" id="todo_item_status_filter_all" autocomplete="off" {% if todo_item_status_filter == "ALL" %}checked{% endif %}>
+          <label class="btn btn-outline-primary ps-4 pe-4" for="todo_item_status_filter_all">All</label>
         </div>
       </div>
-      <div class="modal fade" id="TodoListCreateModal" tabindex="-1" role="dialog" aria-labelledby="TodoListCreateModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="TodoListCreateModalLabel">Create New Todo List</h5>
-              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form>
-                <div class="form-group">
-                  <label for="todo_list_name_input" class="col-form-label">Name:</label>
-                  <textarea class="form-control" id="todo_list_name_input"></textarea>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-primary" id="create_todolist_btn">Create</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal fade" id="TodoItemCreateModal" tabindex="-1" role="dialog" aria-labelledby="TodoItemCreateModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="TodoItemCreateModalLabel">Create New Todo Task</h5>
-              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <form>
-                <div class="form-group">
-                  <label for="todo_item_desc_input" class="col-form-label">Task</label>
-                  <textarea class="form-control" id="todo_item_desc_input"></textarea>
-                </div>
-                <div class="form-group mt-3">
-                  <label for="target_datepicker">Todo Target Date</label>
-                  <div id="target_datepicker" class="date input-group">
-                    <input type="text" id="todo_target_date" name="todo_target_date" placeholder="Choose Date" class="form-control">
-                    <div class="input-group-append">
-                      <span class="input-group-text"><i class="fa fa-calendar"></i></span>
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-2" id="create_task_success_msg">
-                  <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <strong></strong>
-                    <button type="button" class="btn-close hide-alert-on-click" aria-label="Close"></button>
-                  </div>
-                </div>
-                <div class="mt-2" id="create_task_error_msg">
-                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong></strong>
-                    <button type="button" class="btn-close hide-alert-on-click" aria-label="Close"></button>
-                  </div>
-                </div>
-              </form>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-primary" id="create_todoitem_btn">Create</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-8"></div>
-      {% for message in messages %}
-        <div class="col-4 mt-3">
-          <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-            <strong>{{ message }}</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        </div>
-      {% endfor %}
-      {% if todo_items %}
-      <div class="form-group mb-4 col-12">
-        <table class="table table-striped mt-3">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">task</th>
-              <th scope="col">target date</th>
-              <th scope="col">Mark Done</th>
-              <th scope="col">Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for todo_item in todo_items %}
-            <tr>
-              <th scope="row">{{todo_item.id}}</th>
-              <td>{{todo_item.desc}}</td>
-              <td>{{todo_item.target_date}}</td>
-              <td>{% if todo_item.status == 'OPEN' %}<button type="submit" class="btn btn-sm btn-success" onclick="manage_todo_item('DONE', {{todo_item.id}})">Done</button>{% else %}Done{% endif %}</td>
-              <td><button type="submit" class="btn btn-sm btn-danger" onclick="manage_todo_item('DELETE', {{todo_item.id}})">Delete</button></td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% else %}
-      <div class="alert alert-secondary mt-3" role="alert">
-        <strong>Empty List</strong>
-      </div>
-      {% endif %}
     </div>
+    <div class="modal fade" id="TodoListRenameModal" tabindex="-1" role="dialog" aria-labelledby="TodoListRenameModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="TodoListRenameModalLabel">Rename Todo List</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="selected_todolist_title" class="col-form-label">Current Title</label>
+                <h5 class="form-control" id="selected_todolist_title"></h5>
+              </div>
+              <div class="form-group">
+                <label for="todo_list_name_input" class="col-form-label">New Title</label>
+                <textarea class="form-control" id="todo_list_newtitle_input"></textarea>
+              </div>
+              <div class="form-group" id="todolist_rename_msg">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="rename_todolist_btn">Rename</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="TodoListCreateModal" tabindex="-1" role="dialog" aria-labelledby="TodoListCreateModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="TodoListCreateModalLabel">Create New Todo List</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="todo_list_name_input" class="col-form-label">Name:</label>
+                <textarea class="form-control" id="todo_list_name_input"></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="create_todolist_btn">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="TodoItemCreateModal" tabindex="-1" role="dialog" aria-labelledby="TodoItemCreateModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="TodoItemCreateModalLabel">Create New Todo Task</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label for="todo_item_desc_input" class="col-form-label">Task</label>
+                <textarea class="form-control" id="todo_item_desc_input"></textarea>
+              </div>
+              <div class="form-group mt-3">
+                <label for="target_datepicker">Todo Target Date</label>
+                <div id="target_datepicker" class="date input-group">
+                  <input type="text" id="todo_target_date" name="todo_target_date" placeholder="Choose Date" class="form-control">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2" id="create_task_success_msg">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                  <strong></strong>
+                  <button type="button" class="btn-close hide-alert-on-click" aria-label="Close"></button>
+                </div>
+              </div>
+              <div class="mt-2" id="create_task_error_msg">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  <strong></strong>
+                  <button type="button" class="btn-close hide-alert-on-click" aria-label="Close"></button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="create_todoitem_btn">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="TodoItemEditModal" tabindex="-1" role="dialog" aria-labelledby="TodoItemEditModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="TodoItemEditModalLabel">Edit Task</h5>
+            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="form-group">
+                <label id="edit_todo_item_id_label" class="col-form-label"></label>
+                <input class="d-none" id="edit_todo_item_id">
+              </div>
+              <div class="form-group">
+                <label for="edit_todo_list_dd" class="col-form-label">Todo List</label>
+                <select class="form-select" aria-label="Default select example" id="edit_todo_list_dd" name="todo_list_id">
+                  {% for todo_list in todo_lists %}
+                  <option value="{{todo_list.id}}">{{todo_list.title}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="todo_item_desc_input" class="col-form-label">Todo Desc</label>
+                <textarea class="form-control" id="edit_todo_item_desc_input"></textarea>
+              </div>
+              <div class="form-group mt-3">
+                <label for="edit_target_datepicker">Todo Target Date</label>
+                <div id="edit_target_datepicker" class="date input-group">
+                  <input type="text" id="edit_todo_target_date" name="todo_target_date" placeholder="Choose Date" class="form-control">
+                  <div class="input-group-append">
+                    <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group" id="edit_task_msg">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="save_todoitem_changes_btn">Save Changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-8"></div>
+    {% for message in messages %}
+      <div class="col-4 mt-3">
+        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+          <strong>{{ message }}</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      </div>
+    {% endfor %}
+    {% if todo_items %}
+    <div class="form-group mb-4 col-12">
+      <table class="table table-striped mt-3">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">task</th>
+            <th scope="col">target date</th>
+            <th scope="col">Mark Done</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for todo_item in todo_items %}
+          <tr>
+            <th scope="row">{{todo_item.id}}</th>
+            <td id="item_{{todo_item.id}}_desc">{% if todolist_id_filter == None %}<a href="/easy_todo?todolist_id_filter={{todo_item.todo_list_id}}">{{todo_item.todo_list_title}}</a> / {% endif %}{{todo_item.desc}}</td>
+            <td id="item_{{todo_item.id}}_target_date">{{todo_item.target_date}}</td>
+            <td>{% if todo_item.status == 'OPEN' %}<button type="submit" class="btn btn-sm btn-success" onclick="manage_todo_item('DONE', {{todo_item.id}})">Done</button>{% else %}Done{% endif %}</td>
+            <td><button type="submit" class="btn btn-sm btn-secondary" onclick="edit_todo_item({{todo_item.todo_list_id}}, {{todo_item.id}})">Edit</button></td>
+            <td><button type="submit" class="btn btn-sm btn-danger" onclick="manage_todo_item('DELETE', {{todo_item.id}})">Delete</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="alert alert-secondary mt-3" role="alert">
+      <strong>Empty List</strong>
+    </div>
+    {% endif %}
+  </div>
 {% endblock %}
 {% block page_js_file %}
 <script src="{% static 'js/easy_todo.js' %}"></script>

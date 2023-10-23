@@ -16,3 +16,6 @@ class TodoListService:
 
     def get_default_list_id(self, owner):
         return TodoList.get_default_list_id(owner)
+
+    def rename_todo_list(self, owner, todo_list_id, new_title):
+        TodoList.update_new_title(owner, todo_list_id, new_title)

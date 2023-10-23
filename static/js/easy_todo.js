@@ -19,6 +19,7 @@ $(document).ready(function () {
     e.stopPropagation();
   });
   target_datepicker.datepicker('setDate', 'today');
+  $("#selected_todolist_title").text($("#todo_list_dd option:selected").text());
 });
 $("#delete_todolist_btn").on("click", function() {
   if(!confirm("Delete List, Are you sure?")) {
@@ -115,6 +116,83 @@ function manage_todo_item(op, todo_item_id) {
   });
 }
 
+function edit_todo_item(todo_list_id, todo_item_id) {
+	$("#edit_todo_item_id").val(todo_item_id);
+	$("#edit_todo_list_dd").val(todo_list_id);
+	$("#edit_todo_item_id_label").text("# " + todo_item_id);
+	$("#edit_todo_item_desc_input").val($("#item_" + todo_item_id + "_desc").text());
+
+	edit_target_datepicker = $('#edit_target_datepicker').datepicker({
+    language: "es",
+    autoclose: true,
+    format: "dd/mm/yyyy",
+    todayHighlight: true,
+    startDate: new Date(),
+  });
+  edit_target_datepicker.on('hide', function(e) {
+    e.stopPropagation();
+  });
+	tokens = $("#item_" + todo_item_id + "_target_date").text().split("/");
+	edit_target_date = new Date(parseInt(tokens[2]), parseInt(tokens[1])-1, parseInt(tokens[0]))
+  edit_target_datepicker.datepicker('setDate', edit_target_date);
+  $("#TodoItemEditModal").modal("show");
+}
+
+$("#save_todoitem_changes_btn").click(function() {
+  data = {
+      "todo_item_id": parseInt($("#edit_todo_item_id").val()),
+      "desc": $("#edit_todo_item_desc_input").val(),
+      "todo_list_id": parseInt($("#edit_todo_list_dd").val()),
+      "target_date": $("#edit_todo_target_date").val(),
+    };
+  $.ajax({
+    type: "PATCH",
+    url: "/todo_items/manage",
+    data: data,
+    beforeSend: function (xhr){
+      xhr.setRequestHeader('X-CSRFToken', $("[name=csrfmiddlewaretoken]").val());
+    },
+    error: function(error) {
+      console.log(error);
+    },
+    success: function(resp) {
+      if (resp["error"] == true) {
+        show_msg(resp["error"], resp["msg"], "#edit_task_msg")
+      } else {
+        location.reload()
+      }
+    }
+  });
+});
+
+function show_msg(error, msg, root) {
+  if (error == true) {
+    html = '<div class="alert alert-danger mt-3" role="alert">' + msg + '</div>'
+  } else {
+		html = '<div class="alert alert-success mt-3" role="alert">' + msg + '</div>'
+  }
+  $(root).html(html);
+}
+
+$("#rename_todolist_btn").click(function() {
+  $.ajax({
+    type: "PATCH",
+    url: "/todo_lists/manage",
+    data: {todo_list_id: $("#todo_list_dd").val(), new_title: $("#todo_list_newtitle_input").val()},
+    beforeSend: function (xhr){
+      xhr.setRequestHeader('X-CSRFToken', $("[name=csrfmiddlewaretoken]").val());
+    },
+    error: function(error) {console.log(error);},
+    success: function(resp) {
+      if (resp["error"] == true) {
+        show_msg(resp["error"], resp["msg"], "#todolist_rename_msg");
+      } else {
+        location.reload();
+      }
+    }
+  });
+})
+
 function update_location_href(param_key, param_value) {
   params = {}
   tokens = location.href.split("?")
@@ -137,3 +215,11 @@ function update_location_href(param_key, param_value) {
 $("input[name=todo_item_status_filter]").change(function() {
   update_location_href("todo_item_status_filter", $(this).attr("data-value"));
 });
+
+$("#todolist_rename_modal_open_btn").click(function() {
+	if ($("#todo_list_dd").val() == "-1") {
+		alert("Please select a Todo list first to rename");
+	} else {
+		$("#TodoListRenameModal").modal("show");
+	}
+})

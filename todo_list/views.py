@@ -2,7 +2,7 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
 
 from todo_item.services import TodoItemService
@@ -36,7 +36,16 @@ def manage_todo_list_view(request):
             msg = "Hiss!!! Can't delete default list"
             messages.error(request, msg)
             error = True
-
+        return JsonResponse({"msg": msg, "error": error})
+    elif request.method == "PATCH":
+        error = False
+        msg = "Hurrah!!! You successfully renamed it."
+        req_data = QueryDict(request.body)
+        try:
+            TodoListService().rename_todo_list(request.user, req_data["todo_list_id"], req_data["new_title"])
+        except:
+            msg = "Hiss!!! Duplicate list found with same name."
+            error = True
         return JsonResponse({"msg": msg, "error": error})
     raise NotImplementedError
 
@@ -49,7 +58,7 @@ def easy_todo_view(request):
         if todolist_id_filter.isnumeric():
             todolist_id_filter = int(todolist_id_filter)
         else:
-            todolist_id_filter = TodoListService().get_default_list_id(request.user)
+            todolist_id_filter = None
         todo_items = TodoItemService().get_todo_items(request.user, todolist_id_filter, todo_item_status_filter)
         resp_context = {
             "todo_lists": TodoListService().get_todo_lists(request.user),

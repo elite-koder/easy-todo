@@ -25,11 +25,17 @@ class TodoItem(BaseModel):
         return cls.objects.get_or_create(desc=todo_desc, owner=owner, target_date=timezone.make_aware(target_date, timezone.get_default_timezone()), todo_list_id=todolist_id)
 
     @classmethod
+    def update_todo_item(cls, owner, todo_item_id, desc, todo_list_id, target_date):
+        cls.objects.filter(owner=owner, id=todo_item_id).update(desc=desc, todo_list_id=todo_list_id, target_date=timezone.make_aware(target_date, timezone.get_default_timezone()))
+
+    @classmethod
     def get_todo_items_from_list(cls, owner, todo_list_id, todo_item_status):
-        todo_items = cls.objects.filter(owner=owner, todo_list_id=todo_list_id)
+        todo_items = cls.objects.filter(owner=owner)
+        if todo_list_id is not None:
+            todo_items = todo_items.filter(todo_list_id=todo_list_id)
         if todo_item_status == TodoItemStatus.OPEN:
             todo_items = todo_items.filter(status=todo_item_status)
-        todo_items = todo_items.order_by("target_date").values("id", "desc", "status", "target_date")
+        todo_items = todo_items.order_by("target_date").values("id", "desc", "status", "target_date", "todo_list_id", todo_list_title=F("todo_list__title"))
         for item in todo_items:
             item["target_date"] = item["target_date"].strftime("%d/%m/%Y")
         return todo_items

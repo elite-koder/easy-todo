@@ -11,6 +11,9 @@ class TodoList(BaseModel):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="todo_lists")
     can_delete = models.BooleanField(default=True)
 
+    class Meta:
+        unique_together = ["title", "owner"]
+
     @classmethod
     def get_todo_lists(cls, owner):
         return list(TodoList.objects.filter(owner=owner).values("id", "title"))
@@ -33,3 +36,7 @@ class TodoList(BaseModel):
     @classmethod
     def get_default_list_id(cls, owner):
         return TodoList.objects.get(owner=owner, can_delete=False).id
+
+    @classmethod
+    def update_new_title(cls, owner, todo_list_id, new_title):
+        TodoList.objects.filter(owner=owner, id=todo_list_id).update(title=new_title)

@@ -2,7 +2,7 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, QueryDict
 from django.shortcuts import render, redirect
 from django.utils import timezone
 
@@ -39,4 +39,15 @@ def manage_todo_item_view(request):
         elif op == "DELETE":
             TodoItemService().delete_todo_item(request.user, todo_item_id)
             return HttpResponse(status=204)
+    elif request.method == "PATCH":
+        error = False
+        msg = "Hurrah!!! Updated successfully."
+        req_data = QueryDict(request.body)
+        try:
+            target_date = timezone.datetime.strptime(req_data["target_date"], "%d/%m/%Y")
+            TodoItemService().update_todo_item(request.user, req_data["todo_item_id"], req_data["desc"], req_data["todo_list_id"], target_date)
+        except Exception as e:
+            error = True
+            msg = "Hiss!!! Error occurred please try after sometime."
+        return JsonResponse({"error": error, "msg": msg})
     raise NotImplementedError
